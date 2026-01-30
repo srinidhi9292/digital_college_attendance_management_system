@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Subject Assignments{% endblock %}
+{% block page_title %}Manage Subject Assignments{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                <strong>Info:</strong> Subject assignments link Faculty → Subject → Section → Year. Create these before adding timetable entries.
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0"><i class="fas fa-link me-2"></i>Subject Assignments</h4>
+                    <button type="button" class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#addAssignmentModal">
+                        <i class="fas fa-plus"></i> Add Assignment
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Faculty</th>
+                                    <th>Subject</th>
+                                    <th>Section</th>
+                                    <th>Academic Year</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for assignment in assignments %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{ assignment.faculty.user.get_full_name }}</td>
+                                    <td>{{ assignment.subject.code }} - {{ assignment.subject.name }}</td>
+                                    <td>{{ assignment.section }}</td>
+                                    <td>{{ assignment.academic_year.year }}</td>
+                                    <td>
+                                        {% if assignment.is_active %}
+                                            <span class="badge bg-success">Active</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Inactive</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ assignment.id }}">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <!-- Delete Modal -->
+                                <div class="modal fade" id="deleteModal{{ assignment.id }}" tabindex="-1">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <form method="post" action="{% url 'delete_subject_assignment' assignment.id %}">
+                                                {% csrf_token %}
+                                                <div class="modal-header bg-danger text-white">
+                                                    <h5 class="modal-title">Delete Assignment</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <p>Delete this assignment?</p>
+                                                    <div class="alert alert-light border">
+                                                        <strong>Faculty:</strong> {{ assignment.faculty.user.get_full_name }}<br>
+                                                        <strong>Subject:</strong> {{ assignment.subject.name }}<br>
+                                                        <strong>Section:</strong> {{ assignment.section }}
+                                                    </div>
+                                                    <p class="text-danger small">This will also remove related timetable entries!</p>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                    <button type="submit" class="btn btn-danger">Delete</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="7" class="text-center">No assignments found. Create one to enable timetable entries.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Assignment Modal -->
+<div class="modal fade" id="addAssignmentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post">
+                {% csrf_token %}
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">Create Subject Assignment</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Faculty</label>
+                        <select class="form-select" name="faculty" required>
+                            <option value="">Select Faculty</option>
+                            {% for faculty in faculties %}
+                                <option value="{{ faculty.id }}">
+                                    {{ faculty.user.get_full_name }} ({{ faculty.employee_id }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Subject</label>
+                        <select class="form-select" name="subject" required>
+                            <option value="">Select Subject</option>
+                            {% for subject in subjects %}
+                                <option value="{{ subject.id }}">
+                                    {{ subject.code }} - {{ subject.name }} (Sem {{ subject.semester }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Section</label>
+                        <select class="form-select" name="section" required>
+                            <option value="">Select Section</option>
+                            {% for section in sections %}
+                                <option value="{{ section.id }}">
+                                    {{ section.branch.code }} - Sem {{ section.semester }} - Section {{ section.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Academic Year</label>
+                        <input type="text" class="form-control" name="academic_year" placeholder="e.g., 2024-2025" pattern="\d{4}-\d{4}" required>
+                        <small class="form-text text-muted">Format: YYYY-YYYY (e.g., 2024-2025)</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save Assignment</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

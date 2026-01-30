@@ -1,0 +1,266 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Sections{% endblock %}
+{% block page_title %}Manage Sections{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0"><i class="fas fa-layer-group me-2"></i>Manage Sections</h4>
+                    <button type="button" class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#addSectionModal">
+                        <i class="fas fa-plus"></i> Add Section
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>S.No</th>
+                                    <th>Branch</th>
+                                    <th>Section</th>
+                                    <th>Semester</th>
+                                    <th>Academic Year</th>
+                                    <th>Strength</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for section in sections %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td>{{ section.branch.code }}</td>
+                                    <td><span class="badge bg-primary">{{ section.name }}</span></td>
+                                    <td>Semester {{ section.semester }}</td>
+                                    <td>{{ section.academic_year.year }}</td>
+                                    <td>
+                                        <span class="badge bg-info">{{ section.students.count }} / {{ section.capacity }}</span>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#viewSectionModal{{ section.id }}">
+                                            <i class="fas fa-eye"></i> View
+                                        </button>
+                                        <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editSectionModal{{ section.id }}">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </button>
+                                        <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteSectionModal{{ section.id }}">
+                                            <i class="fas fa-trash"></i> Delete
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <!-- View Modal -->
+                                <div class="modal fade" id="viewSectionModal{{ section.id }}" tabindex="-1">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header bg-info text-white">
+                                                <h5 class="modal-title">Section Details</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p><strong>Branch:</strong> {{ section.branch.name }} ({{ section.branch.code }})</p>
+                                                <p><strong>Section Name:</strong> {{ section.name }}</p>
+                                                <p><strong>Current Semester:</strong> {{ section.semester }}</p>
+                                                <p><strong>Academic Year:</strong> {{ section.academic_year.year }}</p>
+                                                <p><strong>Capacity:</strong> {{ section.capacity }} Students</p>
+                                                <p><strong>Enrolled Students:</strong> {{ section.students.count }}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Edit Modal -->
+                                <div class="modal fade" id="editSectionModal{{ section.id }}" tabindex="-1">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <form method="post" action="{% url 'edit_section' section.id %}">
+                                                {% csrf_token %}
+                                                <div class="modal-header bg-warning">
+                                                    <h5 class="modal-title">Edit Section</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Branch</label>
+                                                        <select class="form-select" name="branch" required>
+                                                            {% for branch in branches %}
+                                                            <option value="{{ branch.id }}" {% if section.branch.id == branch.id %}selected{% endif %}>
+                                                                {{ branch.name }} ({{ branch.code }})
+                                                            </option>
+                                                            {% endfor %}
+                                                        </select>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Section Name</label>
+                                                        <input type="text" class="form-control" name="name" value="{{ section.name }}" required>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Semester</label>
+                                                        <input type="number" class="form-control" name="semester" value="{{ section.semester }}" min="1" max="8" required>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Academic Year</label>
+                                                        <input type="text" class="form-control" name="academic_year" value="{{ section.academic_year.year }}" placeholder="e.g. 2024-2025" required>
+                                                        <small class="text-muted">Format: YYYY-YYYY (e.g., 2024-2025)</small>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Capacity</label>
+                                                        <input type="number" class="form-control" name="capacity" value="{{ section.capacity }}" required>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                    <button type="submit" class="btn btn-warning">Update</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Delete Modal -->
+                                <div class="modal fade" id="deleteSectionModal{{ section.id }}" tabindex="-1">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <form method="post" action="{% url 'delete_section' section.id %}">
+                                                {% csrf_token %}
+                                                <div class="modal-header bg-danger text-white">
+                                                    <h5 class="modal-title">Delete Section</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <p>Are you sure you want to delete <strong>{{ section.branch.code }} - Section {{ section.name }}</strong>?</p>
+                                                    <p class="text-danger">This will remove section data for all enrolled students!</p>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                    <button type="submit" class="btn btn-danger">Delete</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="7" class="text-center">No sections found</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Section Modal -->
+<div class="modal fade" id="addSectionModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" action="{% url 'manage_sections' %}">
+                {% csrf_token %}
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">Add New Section</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Department</label>
+                        <select class="form-select" id="departmentSelect" name="department" required>
+                            <option value="">Select Department</option>
+                            {% for dept in departments %}
+                                <option value="{{ dept.id }}">{{ dept.name }} ({{ dept.code }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Branch</label>
+                        <select class="form-select" id="branchSelect" name="branch" required disabled>
+                            <option value="">Select Department First</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Section Name</label>
+                        <input type="text" class="form-control" name="name" placeholder="e.g. A" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Semester</label>
+                        <select class="form-select" name="semester" required>
+                            <option value="">Select Semester</option>
+                            {% for i in "12345678"|make_list %}
+                                <option value="{{ i }}">Semester {{ i }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Academic Year</label>
+                        <input type="text" class="form-control" name="academic_year" placeholder="e.g. 2024-2025" required>
+                        <small class="text-muted">Format: YYYY-YYYY (e.g., 2024-2025)</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Capacity (No. of Students)</label>
+                        <input type="number" class="form-control" name="capacity" value="60" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save Section</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript for cascading dropdown -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const allBranches = {
+        {% for branch in branches %}
+            {{ branch.id }}: {
+                department_id: {{ branch.department.id }},
+                name: "{{ branch.name }}",
+                code: "{{ branch.code }}"
+            },
+        {% endfor %}
+    };
+
+    const departmentSelect = document.getElementById('departmentSelect');
+    const branchSelect = document.getElementById('branchSelect');
+
+    if (departmentSelect && branchSelect) {
+        departmentSelect.addEventListener('change', function() {
+            const selectedDeptId = parseInt(this.value);
+            
+            // Clear existing options
+            branchSelect.innerHTML = '<option value="">Select Branch</option>';
+            
+            if (selectedDeptId) {
+                // Filter branches by department
+                const filteredBranches = Object.entries(allBranches).filter(
+                    ([id, branch]) => branch.department_id === selectedDeptId
+                );
+                
+                if (filteredBranches.length > 0) {
+                    filteredBranches.forEach(([id, branch]) => {
+                        const option = document.createElement('option');
+                        option.value = id;
+                        option.textContent = `${branch.name} (${branch.code})`;
+                        branchSelect.appendChild(option);
+                    });
+                    branchSelect.disabled = false;
+                } else {
+                    branchSelect.innerHTML = '<option value="">No branches available</option>';
+                    branchSelect.disabled = true;
+                }
+            } else {
+                branchSelect.innerHTML = '<option value="">Select Department First</option>';
+                branchSelect.disabled = true;
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

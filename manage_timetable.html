@@ -1,0 +1,278 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Timetable{% endblock %}
+{% block page_title %}Manage Timetable{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0"><i class="fas fa-calendar-alt me-2"></i>Timetable Management</h4>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-info btn-sm text-white" data-bs-toggle="modal" data-bs-target="#timeReferenceModal">
+                            <i class="fas fa-clock"></i> View Schedule Guide
+                        </button>
+                        <button type="button" class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#addTimetableModal">
+                            <i class="fas fa-plus"></i> Add Entry
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <label class="form-label fw-bold"><i class="fas fa-filter me-1"></i> Filter by Day:</label>
+                        <div class="btn-group shadow-sm" role="group">
+                            <button type="button" class="btn btn-sm btn-outline-primary active" onclick="filterDay('all', this)">All</button>
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="filterDay('0', this)">Mon</button>
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="filterDay('1', this)">Tue</button>
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="filterDay('2', this)">Wed</button>
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="filterDay('3', this)">Thu</button>
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="filterDay('4', this)">Fri</button>
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="filterDay('5', this)">Sat</button>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped border" id="timetableTable">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Day</th>
+                                    <th>Period</th>
+                                    <th>Time Duration</th>
+                                    <th>Subject</th>
+                                    <th>Faculty</th>
+                                    <th>Section</th>
+                                    <th>Room</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for entry in timetable %}
+                                <tr data-day="{{ entry.day_of_week }}">
+                                    <td>{{ forloop.counter }}</td>
+                                    <td><span class="badge bg-primary px-3">{{ entry.get_day_of_week_display }}</span></td>
+                                    <td><strong>P{{ entry.period_number }}</strong></td>
+                                    <td>{{ entry.start_time|time:"H:i" }} - {{ entry.end_time|time:"H:i" }}</td>
+                                    <td>{{ entry.subject_assignment.subject.code }}</td>
+                                    <td>{{ entry.subject_assignment.faculty.user.get_full_name }}</td>
+                                    <td>{{ entry.subject_assignment.section.name }}</td>
+                                    <td><span class="text-muted">{{ entry.room_number|default:"N/A" }}</span></td>
+                                    <td>
+                                        <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ entry.id }}">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <div class="modal fade" id="deleteModal{{ entry.id }}" tabindex="-1">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <form method="post" action="{% url 'delete_timetable' entry.id %}">
+                                                {% csrf_token %}
+                                                <div class="modal-header bg-danger text-white">
+                                                    <h5 class="modal-title">Delete Entry</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <p>Remove this entry from the schedule?</p>
+                                                    <div class="alert alert-light border">
+                                                        <strong>{{ entry.get_day_of_week_display }}</strong> | Period {{ entry.period_number }}<br>
+                                                        Subject: {{ entry.subject_assignment.subject.name }}
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                    <button type="submit" class="btn btn-danger">Confirm Delete</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="9" class="text-center py-4 text-muted">No timetable entries found.</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="addTimetableModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post">
+                {% csrf_token %}
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">New Timetable Entry</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Subject Assignment (Faculty - Subject - Section)</label>
+                        <select class="form-select" name="subject_assignment" required>
+                            <option value="">Select Assignment</option>
+                            {% for assignment in subject_assignments %}
+                                <option value="{{ assignment.id }}">
+                                    {{ assignment.faculty.user.get_full_name }} - {{ assignment.subject.code }} - {{ assignment.section }} ({{ assignment.academic_year.year }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Day of Week</label>
+                        <select class="form-select" name="day_of_week" required>
+                            <option value="">Select Day</option>
+                            {% for day in days %}
+                                <option value="{{ day.0 }}">{{ day.1 }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Period(s)</label>
+                        <div class="alert alert-info mb-2 py-2">
+                            <small><i class="fas fa-info-circle me-1"></i> Select single period for theory class or multiple consecutive periods for lab</small>
+                        </div>
+                        <div class="row g-2" id="periodCheckboxes">
+                            <div class="col-4">
+                                <div class="form-check">
+                                    <input class="form-check-input period-check" type="checkbox" value="1" id="period1" name="periods">
+                                    <label class="form-check-label" for="period1">
+                                        P1 (09:30-10:20)
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="form-check">
+                                    <input class="form-check-input period-check" type="checkbox" value="2" id="period2" name="periods">
+                                    <label class="form-check-label" for="period2">
+                                        P2 (10:20-11:10)
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="form-check">
+                                    <input class="form-check-input period-check" type="checkbox" value="3" id="period3" name="periods">
+                                    <label class="form-check-label" for="period3">
+                                        P3 (11:30-12:20)
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="form-check">
+                                    <input class="form-check-input period-check" type="checkbox" value="4" id="period4" name="periods">
+                                    <label class="form-check-label" for="period4">
+                                        P4 (12:20-13:10)
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="form-check">
+                                    <input class="form-check-input period-check" type="checkbox" value="5" id="period5" name="periods">
+                                    <label class="form-check-label" for="period5">
+                                        P5 (14:10-15:00)
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="form-check">
+                                    <input class="form-check-input period-check" type="checkbox" value="6" id="period6" name="periods">
+                                    <label class="form-check-label" for="period6">
+                                        P6 (15:00-15:50)
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-4">
+                                <div class="form-check">
+                                    <input class="form-check-input period-check" type="checkbox" value="7" id="period7" name="periods">
+                                    <label class="form-check-label" for="period7">
+                                        P7 (15:50-16:30)
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <input type="hidden" name="period_number" id="periodNumberHidden">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Room Number</label>
+                        <input type="text" class="form-control" name="room_number" placeholder="e.g., LH-38">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary" id="submitBtn">Save Entry</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="timeReferenceModal" tabindex="-1">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title">Standard Timings</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-sm table-borderless mb-0">
+                    <tr class="border-bottom"><td>P1</td><td class="text-end">09:30 - 10:20</td></tr>
+                    <tr class="border-bottom"><td>P2</td><td class="text-end">10:20 - 11:10</td></tr>
+                    <tr class="table-light"><td>Break</td><td class="text-end">11:10 - 11:30</td></tr>
+                    <tr class="border-bottom"><td>P3</td><td class="text-end">11:30 - 12:20</td></tr>
+                    <tr class="border-bottom"><td>P4</td><td class="text-end">12:20 - 13:10</td></tr>
+                    <tr class="table-light"><td>Lunch</td><td class="text-end">13:10 - 14:10</td></tr>
+                    <tr class="border-bottom"><td>P5</td><td class="text-end">14:10 - 15:00</td></tr>
+                    <tr class="border-bottom"><td>P6</td><td class="text-end">15:00 - 15:50</td></tr>
+                    <tr class="border-bottom"><td>P7</td><td class="text-end">15:50 - 16:30</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function filterDay(day, btn) {
+    document.querySelectorAll('.btn-group .btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+
+    let rows = document.querySelectorAll('#timetableTable tbody tr');
+    rows.forEach(row => {
+        if (day === 'all' || row.dataset.day === day) {
+            row.style.display = "";
+        } else {
+            row.style.display = "none";
+        }
+    });
+}
+
+// Handle period selection
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('#addTimetableModal form');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    form.addEventListener('submit', function(e) {
+        const checkedPeriods = Array.from(document.querySelectorAll('.period-check:checked'))
+            .map(cb => cb.value)
+            .sort((a, b) => parseInt(a) - parseInt(b));
+        
+        if (checkedPeriods.length === 0) {
+            e.preventDefault();
+            alert('Please select at least one period');
+            return false;
+        }
+        
+        // Set the hidden field with comma-separated values
+        document.getElementById('periodNumberHidden').value = checkedPeriods.join(',');
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Dashboard{% endblock %}
+{% block page_title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Welcome Banner -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-info">
+                <h5><i class="fas fa-user-shield me-2"></i>Welcome, Administrator!</h5>
+                <p class="mb-0">Manage your college attendance system from this dashboard.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row">
+        <div class="col-md-3 mb-4">
+            <div class="stat-card text-center">
+                <div class="icon text-primary">
+                    <i class="fas fa-user-graduate"></i>
+                </div>
+                <h3>{{ total_students }}</h3>
+                <p>Total Students</p>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-4">
+            <div class="stat-card text-center">
+                <div class="icon text-success">
+                    <i class="fas fa-chalkboard-teacher"></i>
+                </div>
+                <h3>{{ total_faculty }}</h3>
+                <p>Faculty Members</p>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-4">
+            <div class="stat-card text-center">
+                <div class="icon text-info">
+                    <i class="fas fa-building"></i>
+                </div>
+                <h3>{{ total_departments }}</h3>
+                <p>Departments</p>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-4">
+            <div class="stat-card text-center">
+                <div class="icon text-warning">
+                    <i class="fas fa-book"></i>
+                </div>
+                <h3>{{ total_subjects }}</h3>
+                <p>Subjects</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card card-custom">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-tasks me-2"></i>Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <a href="{% url 'manage_students' %}" class="btn btn-outline-primary w-100 py-3">
+                                <i class="fas fa-user-plus fa-2x d-block mb-2"></i>
+                                <span>Add Student</span>
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{% url 'manage_faculty' %}" class="btn btn-outline-success w-100 py-3">
+                                <i class="fas fa-user-tie fa-2x d-block mb-2"></i>
+                                <span>Add Faculty</span>
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{% url 'manage_subjects' %}" class="btn btn-outline-info w-100 py-3">
+                                <i class="fas fa-book-medical fa-2x d-block mb-2"></i>
+                                <span>Add Subject</span>
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{% url 'manage_timetable' %}" class="btn btn-outline-warning w-100 py-3">
+                                <i class="fas fa-calendar-plus fa-2x d-block mb-2"></i>
+                                <span>Add Timetable</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Management Links -->
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card card-custom">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0">Academic Structure</h6>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="{% url 'manage_departments' %}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-building me-2"></i>Departments
+                    </a>
+                    <a href="{% url 'manage_branches' %}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-code-branch me-2"></i>Branches
+                    </a>
+                    <a href="{% url 'manage_sections' %}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-layer-group me-2"></i>Sections
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card card-custom">
+                <div class="card-header bg-success text-white">
+                    <h6 class="mb-0">User Management</h6>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="{% url 'manage_faculty' %}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-chalkboard-teacher me-2"></i>Faculty
+                    </a>
+                    <a href="{% url 'manage_students' %}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-user-graduate me-2"></i>Students
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card card-custom">
+                <div class="card-header bg-info text-white">
+                    <h6 class="mb-0">Course Management</h6>
+                </div>
+                <div class="list-group list-group-flush">
+                    <a href="{% url 'manage_subjects' %}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-book me-2"></i>Subjects
+                    </a>
+                    <a href="{% url 'manage_timetable' %}" class="list-group-item list-group-item-action">
+                        <i class="fas fa-calendar-alt me-2"></i>Timetable
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,245 @@
+{% extends 'base.html' %}
+
+{% block title %}Manage Faculty{% endblock %}
+{% block page_title %}Manage Faculty{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0"><i class="fas fa-chalkboard-teacher me-2"></i>Faculty Management</h4>
+                    <button type="button" class="btn btn-light btn-sm" data-bs-toggle="modal" data-bs-target="#addFacultyModal">
+                        <i class="fas fa-user-plus"></i> Add Faculty
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Emp ID</th>
+                                    <th>Name</th>
+                                    <th>Department</th>
+                                    <th>Designation</th>
+                                    <th>Email</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for faculty in faculty_list %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td><span class="badge bg-primary">{{ faculty.employee_id }}</span></td>
+                                    <td>{{ faculty.user.get_full_name }}</td>
+                                    <td>{{ faculty.department.code }}</td>
+                                    <td>{{ faculty.designation }}</td>
+                                    <td>{{ faculty.user.email }}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#viewModal{{ faculty.id }}" title="View Profile">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editModal{{ faculty.id }}" title="Edit Profile">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{ faculty.id }}" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                <!--view modal-->
+                                <div class="modal fade" id="viewModal{{ faculty.id }}" tabindex="-1">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header bg-info text-white">
+                                                <h5 class="modal-title">Faculty Profile Details</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <div class="text-center mb-3">
+                                                    <i class="fas fa-user-circle fa-4x text-secondary"></i>
+                                                    <h5 class="mt-2">{{ faculty.user.get_full_name }}</h5>
+                                                    <span class="badge bg-primary">{{ faculty.designation }}</span>
+                                                </div>
+                                                <hr>
+                                                <div class="row">
+                                                    <div class="col-6"><p><strong>Emp ID:</strong> {{ faculty.employee_id }}</p></div>
+                                                    <div class="col-6"><p><strong>Dept:</strong> {{ faculty.department.name }}</p></div>
+                                                    <div class="col-12"><p><strong>Qualification:</strong> {{ faculty.qualification }}</p></div>
+                                                    <div class="col-12"><p><strong>Email:</strong> {{ faculty.user.email }}</p></div>
+                                                    <div class="col-6"><p><strong>Phone:</strong> {{ faculty.user.phone|default:"N/A" }}</p></div>
+                                                    <div class="col-6"><p><strong>Joined:</strong> {{ faculty.date_of_joining }}</p></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!--edit modal-->
+                                <div class="modal fade" id="editModal{{ faculty.id }}" tabindex="-1">
+                                    <div class="modal-dialog modal-lg">
+                                        <div class="modal-content">
+                                            <form method="post" action="{% url 'edit_faculty' faculty.id %}">
+                                                {% csrf_token %}
+                                                <div class="modal-header bg-warning">
+                                                    <h5 class="modal-title">Edit Faculty: {{ faculty.user.get_full_name }}</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <h6 class="text-primary border-bottom pb-2 mb-3">Login & Contact</h6>
+                                                    <div class="row">
+                                                        <div class="col-md-6 mb-3">
+                                                            <label class="form-label">Full Name</label>
+                                                            <input type="text" name="full_name" class="form-control" value="{{ faculty.user.get_full_name }}" required>
+                                                        </div>
+                                                        <div class="col-md-6 mb-3">
+                                                            <label class="form-label">Email</label>
+                                                            <input type="email" name="email" class="form-control" value="{{ faculty.user.email }}" required>
+                                                        </div>
+                                                        <div class="col-md-6 mb-3">
+                                                            <label class="form-label">Phone</label>
+                                                            <input type="text" name="phone" class="form-control" value="{{ faculty.user.phone }}">
+                                                        </div>
+                                                    </div>
+                                                    <h6 class="text-primary border-bottom pb-2 mt-3 mb-3">Professional Info</h6>
+                                                    <div class="row">
+                                                        <div class="col-md-6 mb-3">
+                                                            <label class="form-label">Employee ID</label>
+                                                            <input type="text" name="employee_id" class="form-control" value="{{ faculty.employee_id }}" required>
+                                                        </div>
+                                                        <div class="col-md-6 mb-3">
+                                                            <label class="form-label">Department</label>
+                                                            <select name="department" class="form-select" required>
+                                                                {% for dept in departments %}
+                                                                    <option value="{{ dept.id }}" {% if faculty.department.id == dept.id %}selected{% endif %}>{{ dept.name }}</option>
+                                                                {% endfor %}
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-md-6 mb-3">
+                                                            <label class="form-label">Designation</label>
+                                                            <input type="text" name="designation" class="form-control" value="{{ faculty.designation }}" required>
+                                                        </div>
+                                                        <div class="col-md-6 mb-3">
+                                                            <label class="form-label">Date of Joining</label>
+                                                            <input type="date" name="date_of_joining" class="form-control" value="{{ faculty.date_of_joining|date:'Y-m-d' }}" required>
+                                                        </div>
+                                                        <div class="col-12 mb-3">
+                                                            <label class="form-label">Qualification</label>
+                                                            <input type="text" name="qualification" class="form-control" value="{{ faculty.qualification }}" required>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                    <button type="submit" class="btn btn-warning">Update Profile</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!--delete modal-->
+                                <div class="modal fade" id="deleteModal{{ faculty.id }}" tabindex="-1">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <form method="post" action="{% url 'delete_faculty' faculty.id %}">
+                                                {% csrf_token %}
+                                                <div class="modal-header bg-danger text-white">
+                                                    <h5 class="modal-title">Confirm Deletion</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <p>Are you sure you want to delete <strong>{{ faculty.user.get_full_name }}</strong>?</p>
+                                                    <p class="text-danger small">Warning: This deletes the login account and all associated faculty records.</p>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                    <button type="submit" class="btn btn-danger">Delete Permanently</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% empty %}
+                                <tr><td colspan="7" class="text-center">No faculty records found.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!--add faculty modal-->
+<div class="modal fade" id="addFacultyModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form method="post" action="{% url 'manage_faculty' %}">
+                {% csrf_token %}
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">Register New Faculty</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <h6 class="text-primary border-bottom pb-2 mb-3">Login Details</h6>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Username</label>
+                            <input type="text" name="username" class="form-control" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" name="email" class="form-control" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Password</label>
+                            <input type="password" name="password1" class="form-control" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Confirm Password</label>
+                            <input type="password" name="password2" class="form-control" required>
+                        </div>
+                    </div>
+                    <h6 class="text-primary border-bottom pb-2 mt-3 mb-3">Personal & Work Details</h6>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Full Name</label>
+                            <input type="text" name="full_name" class="form-control" placeholder="e.g. John Doe" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Employee ID</label>
+                            <input type="text" name="employee_id" class="form-control" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Department</label>
+                            <select name="department" class="form-select" required>
+                                <option value="">Select Department</option>
+                                {% for dept in departments %}
+                                    <option value="{{ dept.id }}">{{ dept.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Designation</label>
+                            <input type="text" name="designation" class="form-control" placeholder="e.g. Associate Professor" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Joining Date</label>
+                            <input type="date" name="date_of_joining" class="form-control" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Qualification</label>
+                            <input type="text" name="qualification" class="form-control" placeholder="M.Tech, PhD, etc." required>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Save Faculty Profile</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

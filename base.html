@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}College Attendance System{% endblock %}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #27ae60;
+            --danger-color: #e74c3c;
+            --warning-color: #f39c12;
+            --info-color: #16a085;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+        }
+        
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--primary-color), #34495e);
+            color: white;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 250px;
+            padding: 20px 0;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+        
+        .sidebar .nav{
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar .nav-link.logout{
+            margin-top: auto;
+            background: rgba(231, 76, 68, 8.1);
+            border-left: 4px solid #e74c3c;
+        }
+
+        .sidebar .nav-link.logout:hover{
+            background: rgba(231, 76, 68, 8.2);
+        }
+
+        .sidebar .logo {
+            text-align: center;
+            padding: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .sidebar .logo h4 {
+            margin: 0;
+            font-weight: 600;
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255,255,255,0.8);
+            padding: 12px 25px;
+            margin: 5px 15px;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            background: rgba(255,255,255,0.1);
+            color: white;
+        }
+        
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+        }
+        
+        .top-navbar {
+            background: white;
+            padding: 15px 30px;
+            margin: -20px -20px 20px -20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            transition: transform 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+        
+        .stat-card .icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+        
+        .stat-card h3 {
+            font-size: 32px;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+        
+        .stat-card p {
+            color: #7f8c8d;
+            margin: 0;
+        }
+        
+        .card-custom {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .btn-custom {
+            border-radius: 5px;
+            padding: 10px 20px;
+            font-weight: 500;
+        }
+        
+        .table-custom {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .badge-custom {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 500;
+        }
+        
+        .alert-custom {
+            border-radius: 10px;
+            border: none;
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    {% if user.is_authenticated %}
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="logo">
+            <i class="fas fa-graduation-cap fa-2x mb-2"></i>
+            <h4>Attendance System</h4>
+            <small>{{ user.get_role_display }}</small>
+        </div>
+        
+        <nav class="nav flex-column">
+            <a class="nav-link" href="{% url 'dashboard' %}">
+                <i class="fas fa-home me-2"></i> Dashboard
+            </a>
+            
+            {% if user.role == 'admin' %}
+                <a class="nav-link" href="{% url 'manage_departments' %}">
+                    <i class="fas fa-building me-2"></i> Departments
+                </a>
+                <a class="nav-link" href="{% url 'manage_branches' %}">
+                    <i class="fas fa-code-branch me-2"></i> Branches
+                </a>
+                <a class="nav-link" href="{% url 'manage_sections' %}">
+                    <i class="fas fa-layer-group me-2"></i> Sections
+                </a>
+                <a class="nav-link" href="{% url 'manage_subjects' %}">
+                    <i class="fas fa-book me-2"></i> Subjects
+                </a>
+                <a class="nav-link" href="{% url 'manage_faculty' %}">
+                    <i class="fas fa-chalkboard-teacher me-2"></i> Faculty
+                </a>
+                <a class="nav-link" href="{% url 'manage_students' %}">
+                    <i class="fas fa-user-graduate me-2"></i> Students
+                </a>
+                <a class="nav-link" href="{% url 'manage_subject_assignments' %}">
+                    <i class="fas fa-user-tag me-2"></i> Subject Assignments
+                </a>
+                <a class="nav-link" href="{% url 'manage_timetable' %}">
+                    <i class="fas fa-calendar-alt me-2"></i> Timetable
+                </a>
+            {% endif %}
+            
+            {% if user.role == 'faculty' %}
+                <a class="nav-link" href="{% url 'view_attendance_records' %}">
+                    <i class="fas fa-clipboard-list me-2"></i> View Attendance
+                </a>
+                <a class="nav-link" href="{% url 'faculty_profile' %}">
+                    <i class="fas fa-user-circle me-2"></i> My Profile
+                </a>
+            {% endif %}
+            
+            {% if user.role == 'student' %}
+                <a class="nav-link" href="{% url 'view_my_attendance' %}">
+                    <i class="fas fa-chart-bar me-2"></i> My Attendance
+                </a>
+                <a class="nav-link" href="{% url 'student_profile' %}">
+                    <i class="fas fa-user-circle me-2"></i> My Profile
+                </a>
+            {% endif %}
+            
+            <a class="nav-link logout" href="{% url 'logout' %}">
+                <i class="fas fa-sign-out-alt me-2"></i> Logout
+            </a>
+        </nav>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="top-navbar">
+            <h5 class="mb-0">{% block page_title %}Dashboard{% endblock %}</h5>
+            <div>
+                <span class="me-3"><i class="fas fa-user me-2"></i>{{ user.get_full_name }}</span>
+                <span class="badge bg-primary">{{ user.get_role_display }}</span>
+            </div>
+        </div>
+        
+        <!-- Messages -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-custom alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        {% block content %}{% endblock %}
+    </div>
+    {% else %}
+        {% block login_content %}{% endblock %}
+    {% endif %}
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

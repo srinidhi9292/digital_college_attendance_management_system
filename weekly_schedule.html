@@ -1,0 +1,224 @@
+{% extends 'base.html' %}
+{% load custom_filters %}
+
+{% block title %}Weekly Schedule{% endblock %}
+{% block page_title %}Weekly Schedule{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <div>
+                        <h4 class="mb-0">
+                            <i class="fas fa-calendar-week me-2"></i>Weekly Timetable
+                            {% if faculty %}
+                            - {{ faculty.user.get_full_name }}
+                            {% endif %}
+                        </h4>
+                        <small class="d-block mt-1">
+                            {% if active_year %}
+                            Academic Year: {{ active_year.year }}
+                            {% endif %}
+                        </small>
+                    </div>
+                    <div>
+                        <button class="btn btn-sm btn-outline-light me-2" id="refreshBtn">
+                            <i class="fas fa-sync-alt me-1"></i>Refresh
+                        </button>
+                        {% if faculty %}
+                        <a href="{% url 'faculty_dashboard' %}" class="btn btn-light btn-sm">
+                            <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if faculty %}
+                    <div class="alert alert-info mb-4">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Department:</strong> {{ faculty.department.name }} | 
+                        <strong>Designation:</strong> {{ faculty.designation }}
+                    </div>
+                    {% endif %}
+
+
+                    <!-- Table View -->
+                    <div id="tableView">
+                        <div class="table-responsive">
+                            <table class="table table-bordered mb-0">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th style="width: 100px;">Period</th>
+                                        {% for day_num, day_name in days %}
+                                            <th class="text-center">{{ day_name }}</th>
+                                        {% endfor %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for period in "1234567" %}
+                                    <tr>
+                                        <td class="fw-bold bg-light text-center">
+                                            Period {{ period }}
+                                            <br>
+                                            <small class="text-muted">
+                                                {% if period == "1" %}09:30-10:20
+                                                {% elif period == "2" %}10:20-11:10
+                                                {% elif period == "3" %}11:30-12:20
+                                                {% elif period == "4" %}12:20-13:10
+                                                {% elif period == "5" %}14:10-15:00
+                                                {% elif period == "6" %}15:00-15:50
+                                                {% elif period == "7" %}15:50-16:30
+                                                {% endif %}
+                                            </small>
+                                        </td>
+                                        {% for day_num, day_name in days %}
+                                            <td class="p-2 position-relative">
+                                                {% for slot in schedule|dict_lookup:day_num %}
+                                                    {% if slot.period_number == period|add:"0" %}
+                                                        <div class="class-slot border rounded p-2 bg-light hover-card" style="cursor: pointer;" 
+                                                             data-bs-toggle="modal" 
+                                                             data-bs-target="#classModal{{ slot.id }}">
+                                                            <div class="fw-bold text-primary">
+                                                                {{ slot.subject_assignment.subject.code }}
+                                                            </div>
+                                                            <small class="text-muted d-block">
+                                                                {{ slot.subject_assignment.section.name }}
+                                                            </small>
+                                                            {% if slot.room_number %}
+                                                                <small class="badge bg-secondary">{{ slot.room_number }}</small>
+                                                            {% endif %}
+                                                        </div>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </td>
+                                        {% endfor %}
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modals for each class slot -->
+{% for day_slots in schedule.values %}
+    {% for slot in day_slots %}
+    <div class="modal fade" id="classModal{{ slot.id }}" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-book me-2"></i>{{ slot.subject_assignment.subject.code }} - {{ slot.subject_assignment.subject.name }}
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <h6 class="card-title text-primary mb-3">
+                                        <i class="fas fa-info-circle me-2"></i>Class Details
+                                    </h6>
+                                    <div class="row">
+                                        <div class="col-6 mb-2">
+                                            <strong>Day:</strong> {{ slot.get_day_of_week_display }}
+                                        </div>
+                                        <div class="col-6 mb-2">
+                                            <strong>Period:</strong> {{ slot.period_number }}
+                                        </div>
+                                        <div class="col-6 mb-2">
+                                            <strong>Time:</strong> {{ slot.start_time|time:"H:i" }} - {{ slot.end_time|time:"H:i" }}
+                                        </div>
+                                        <div class="col-6 mb-2">
+                                            <strong>Section:</strong> {{ slot.subject_assignment.section }}
+                                        </div>
+                                        {% if slot.room_number %}
+                                        <div class="col-12 mb-2">
+                                            <strong>Room:</strong> {{ slot.room_number }}
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <a href="{% url 'mark_attendance' slot.id %}" class="btn btn-success">
+                        <i class="fas fa-check-circle me-1"></i>Mark Attendance
+                    </a>
+                    <a href="{% url 'edit_attendance' slot.id %}" class="btn btn-warning text-white">
+                        <i class="fas fa-edit me-1"></i>Edit Attendance
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+{% endfor %}
+
+<style>
+.hover-card {
+    transition: all 0.3s ease;
+}
+
+.hover-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    background-color: #e3f2fd !important;
+}
+
+.table td {
+    vertical-align: middle;
+    min-height: 80px;
+}
+
+.class-slot {
+    min-height: 60px;
+}
+
+.btn-group .btn.active {
+    background-color: #0d6efd;
+    color: white;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Refresh button functionality
+    const refreshBtn = document.getElementById('refreshBtn');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', function() {
+            location.reload();
+        });
+    }
+
+    // View toggle functionality
+    const tableViewBtn = document.getElementById('tableViewBtn');
+    const tableView = document.getElementById('tableView');
+
+    if (tableViewBtn && cardViewBtn) {
+        tableViewBtn.addEventListener('click', function() {
+            tableView.style.display = 'block';
+            tableViewBtn.classList.add('active');
+            localStorage.setItem('scheduleView', 'table');
+        });
+
+        cardViewBtn.addEventListener('click', function() {
+            tableView.style.display = 'none';
+            tableViewBtn.classList.remove('active');
+            localStorage.setItem('scheduleView', 'card');
+        });
+    }
+});
+</script>
+
+{% endblock %}

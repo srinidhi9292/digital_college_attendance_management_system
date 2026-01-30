@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block title %}View Attendance{% endblock %}
+{% block page_title %}View Attendance Records{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Attendance Records</h4>
+                </div>
+                <div class="card-body">
+                    <form method="get" class="mb-4">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <label class="form-label">Select Class/Subject</label>
+                                <select name="assignment" class="form-select" onchange="this.form.submit()">
+                                    <option value="">-- Select Class --</option>
+                                    {% for assignment in assignments %}
+                                        <option value="{{ assignment.id }}" {% if selected_assignment and selected_assignment.id == assignment.id %}selected{% endif %}>
+                                            {{ assignment.subject.code }} - {{ assignment.subject.name }} ({{ assignment.section }})
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            {% if selected_assignment %}
+                            <div class="col-md-4 d-flex align-items-end">
+                                <a href="?assignment={{ selected_assignment.id }}&download=pdf" class="btn btn-success w-100">
+                                    <i class="fas fa-download me-2"></i>Download Report
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </form>
+
+                    {% if selected_assignment %}
+                    <div class="alert alert-info">
+                        <strong>Class:</strong> {{ selected_assignment.subject.name }}<br>
+                        <strong>Section:</strong> {{ selected_assignment.section }}<br>
+                        <strong>Academic Year:</strong> {{ selected_assignment.academic_year.year }}
+                    </div>
+
+                    {% if attendance_data %}
+                    <div class="table-responsive">
+                        <table class="table table-hover table-striped">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Roll Number</th>
+                                    <th>Student Name</th>
+                                    <th>Total Classes</th>
+                                    <th>Attended</th>
+                                    <th>Percentage</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for data in attendance_data %}
+                                <tr>
+                                    <td>{{ forloop.counter }}</td>
+                                    <td><span class="badge bg-primary">{{ data.student.roll_number }}</span></td>
+                                    <td>{{ data.student.user.get_full_name }}</td>
+                                    <td>{{ data.total_classes }}</td>
+                                    <td>{{ data.attended }}</td>
+                                    <td>
+                                        <strong>{{ data.percentage }}%</strong>
+                                    </td>
+                                    <td>
+                                        {% if data.percentage >= 75 %}
+                                            <span class="badge bg-success">Good</span>
+                                        {% elif data.percentage >= 60 %}
+                                            <span class="badge bg-warning">Warning</span>
+                                        {% else %}
+                                            <span class="badge bg-danger">Defaulter</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-warning">
+                        No attendance records found for this class.
+                    </div>
+                    {% endif %}
+                    {% else %}
+                    <div class="alert alert-secondary text-center">
+                        <i class="fas fa-info-circle fa-3x mb-3"></i>
+                        <h5>Select a class to view attendance records</h5>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

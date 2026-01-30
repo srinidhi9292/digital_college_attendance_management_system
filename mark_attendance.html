@@ -1,0 +1,146 @@
+{% extends 'base.html' %}
+
+{% block title %}Mark Attendance{% endblock %}
+{% block page_title %}Mark Attendance{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card card-custom">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Class Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-2">
+                            <strong>Subject:</strong> {{ timetable.subject_assignment.subject.name }}
+                        </div>
+                        <div class="col-md-2">
+                            <strong>Section:</strong> {{ timetable.subject_assignment.section }}
+                        </div>
+                        <div class="col-md-2">
+                            <strong>Period:</strong> {{ timetable.period_number }}
+                        </div>
+                        <div class="col-md-2">
+                            <strong>Day:</strong> {{ day_name }}
+                        </div>
+                        <div class="col-md-4">
+                            <strong>Marking for Date:</strong> {{ actual_class_date|date:"d M Y" }}
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card card-custom">
+                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-users me-2"></i>Mark Attendance</h5>
+                    <div>
+                        <button type="button" class="btn btn-light btn-sm me-2" onclick="markAllPresent()">
+                            <i class="fas fa-check-circle me-1"></i>Mark All Present
+                        </button>
+                        <button type="button" class="btn btn-light btn-sm" onclick="markAllAbsent()">
+                            <i class="fas fa-times-circle me-1"></i>Mark All Absent
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form method="post" id="attendanceForm">
+                        {% csrf_token %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Roll Number</th>
+                                        <th>Student Name</th>
+                                        <th>Present</th>
+                                        <th>Absent</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for student in students %}
+                                    <tr>
+                                        <td>{{ forloop.counter }}</td>
+                                        <td><span class="badge bg-primary">{{ student.roll_number }}</span></td>
+                                        <td>{{ student.user.get_full_name }}</td>
+                                        <td>
+                                            <input type="radio" name="status_{{ student.id }}" value="present" 
+                                                {% if student.current_status == 'present' %}checked{% endif %} 
+                                                class="form-check-input status-radio">
+                                        </td>
+                                        <td>
+                                            <input type="radio" name="status_{{ student.id }}" value="absent" 
+                                                {% if student.current_status == 'absent' %}checked{% endif %} 
+                                                class="form-check-input status-radio">
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="6" class="text-center text-muted">No students found in this section.</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="mt-4 text-center">
+                            <a href="{% url 'faculty_weekly_schedule' %}" class="btn btn-secondary btn-custom me-2">
+                                <i class="fas fa-arrow-left me-2"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-success btn-custom">
+                                <i class="fas fa-save me-2"></i>Save Attendance
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-3">
+        <div class="col-12">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                <strong>Note:</strong> You can update attendance later using the "Edit Attendance" option from your weekly schedule.
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function markAllPresent() {
+    document.querySelectorAll('input[value="present"]').forEach(radio => {
+        radio.checked = true;
+    });
+}
+
+function markAllAbsent() {
+    document.querySelectorAll('input[value="absent"]').forEach(radio => {
+        radio.checked = true;
+    });
+}
+
+// Confirm before submitting
+document.getElementById('attendanceForm').addEventListener('submit', function(e) {
+    const unchecked = [];
+    {% for student in students %}
+    if (!document.querySelector('input[name="status_{{ student.id }}"]:checked')) {
+        unchecked.push('{{ student.roll_number }} - {{ student.user.get_full_name }}');
+    }
+    {% endfor %}
+    
+    if (unchecked.length > 0) {
+        if (!confirm('Attendance not marked for:\n' + unchecked.join('\n') + '\n\nContinue anyway?')) {
+            e.preventDefault();
+        }
+    }
+});
+</script>
+
+{% endblock %}

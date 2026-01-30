@@ -1,0 +1,304 @@
+/* Custom CSS for College Attendance Management System */
+
+:root {
+    --primary-color: #4e73df;
+    --secondary-color: #858796;
+    --success-color: #1cc88a;
+    --info-color: #36b9cc;
+    --warning-color: #f6c23e;
+    --danger-color: #e74a3b;
+    --light-color: #f8f9fc;
+    --dark-color: #5a5c69;
+    --sidebar-width: 250px;
+    --transition-speed: 0.3s;
+}
+
+/* GLOBAL STYLES */
+body {
+    background-color: #f4f7f6;
+    font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow-x: hidden;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+/* SIDEBAR STYLES */
+.sidebar {
+    width: var(--sidebar-width);
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    background: #2c3e50;
+    color: white;
+    z-index: 1000;
+    transition: all var(--transition-speed);
+    overflow-y: auto;
+}
+
+.sidebar::-webkit-scrollbar {
+    width: 5px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+    background: #2c3e50;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+}
+
+.sidebar-logo {
+    padding: 20px;
+    text-align: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 10px;
+}
+
+.sidebar-logo h4 {
+    color: white;
+    font-weight: 600;
+    letter-spacing: 1px;
+    margin: 0;
+}
+
+.sidebar-nav {
+    padding: 0;
+    list-style: none;
+}
+
+.nav-link {
+    color: rgba(255, 255, 255, 0.7);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    transition: all var(--transition-speed);
+    font-size: 0.9rem;
+}
+
+.nav-link i {
+    margin-right: 15px;
+    width: 20px;
+    text-align: center;
+}
+
+.nav-link:hover, .nav-link.active {
+    color: white;
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateX(5px);
+}
+
+/* MAIN CONTENT */
+.main-content {
+    margin-left: var(--sidebar-width);
+    padding: 20px;
+    transition: all var(--transition-speed);
+    min-height: 100vh;
+}
+
+.top-header {
+    background: white;
+    padding: 15px 30px;
+    margin: -20px -20px 20px -20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.top-header h5 {
+    margin: 0;
+    color: var(--dark-color);
+    font-weight: 600;
+}
+
+/* CARDS */
+.card-custom {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+    margin-bottom: 25px;
+    overflow: hidden;
+    transition: all var(--transition-speed);
+}
+
+.card-custom:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+.card-custom .card-header {
+    background: white;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    padding: 15px 25px;
+    font-weight: 600;
+}
+
+/* STAT CARDS */
+.stat-card {
+    position: relative;
+    padding: 25px;
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 5px;
+}
+
+.stat-card-primary::before { background: var(--primary-color); }
+.stat-card-success::before { background: var(--success-color); }
+.stat-card-info::before { background: var(--info-color); }
+.stat-card-warning::before { background: var(--warning-color); }
+
+.stat-card h3 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.stat-card p {
+    color: var(--secondary-color);
+    margin-bottom: 0;
+    font-size: 0.9rem;
+}
+
+.stat-card .icon {
+    position: absolute;
+    right: 25px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 2.5rem;
+    opacity: 0.2;
+}
+
+/* TABLES */
+.table-custom {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 10px;
+}
+
+.table-custom thead th {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 15px;
+}
+
+.table-custom tbody tr {
+    background: white;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+    transition: all var(--transition-speed);
+}
+
+.table-custom tbody td {
+    padding: 15px;
+    vertical-align: middle;
+}
+
+/* PROGRESS BARS */
+.progress {
+    height: 10px;
+    border-radius: 5px;
+    background: #eaecf4;
+}
+
+/* ALERTS */
+.alert-custom {
+    border: none;
+    border-radius: 10px;
+    padding: 15px 20px;
+}
+
+/* FORMS */
+.form-control {
+    border-radius: 8px;
+    padding: 12px 15px;
+    border: 1px solid #d1d3e2;
+}
+
+.form-control:focus {
+    box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+    border-color: var(--primary-color);
+}
+
+/* BUTTONS */
+.btn-custom {
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-weight: 600;
+}
+
+/* ANIMATIONS */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+    .sidebar {
+        left: -var(--sidebar-width);
+    }
+    .main-content {
+        margin-left: 0;
+    }
+    .sidebar.active {
+        left: 0;
+    }
+}
+
+/* UTILITY CLASSES */
+.text-gradient {
+    background: linear-gradient(45deg, var(--primary-color), var(--info-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.border-left-primary { border-left: 4px solid var(--primary-color) !important; }
+.border-left-success { border-left: 4px solid var(--success-color) !important; }
+.border-left-warning { border-left: 4px solid var(--warning-color) !important; }
+.border-left-danger { border-left: 4px solid var(--danger-color) !important; }
+
+/* LOADING SPINNER */
+.spinner-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid var(--primary-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}

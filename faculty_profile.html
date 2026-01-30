@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}Faculty Profile{% endblock %}
+{% block page_title %}My Profile{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card card-custom">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-user-edit me-2"></i>Edit Profile</h5>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">First Name</label>
+                                <input type="text" name="first_name" class="form-control" value="{{ user.first_name }}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Last Name</label>
+                                <input type="text" name="last_name" class="form-control" value="{{ user.last_name }}" required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Email</label>
+                                <input type="email" name="email" class="form-control" value="{{ user.email }}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Phone</label>
+                                <input type="text" name="phone" class="form-control" value="{{ user.phone }}">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Designation</label>
+                                <input type="text" name="designation" class="form-control" value="{{ faculty.designation }}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Qualification</label>
+                                <input type="text" name="qualification" class="form-control" value="{{ faculty.qualification }}" required>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-custom">
+                            <i class="fas fa-save me-2"></i>Update Profile
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card card-custom">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-id-card me-2"></i>Profile Information</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Employee ID:</strong> {{ faculty.employee_id }}</p>
+                    <p><strong>Department:</strong> {{ faculty.department.name }}</p>
+                    <p><strong>Date of Joining:</strong> {{ faculty.date_of_joining|date:"d M Y" }}</p>
+                    <p><strong>Username:</strong> {{ user.username }}</p>
+                    <hr>
+                    <a href="{% url 'faculty_change_password' %}" class="btn btn-warning btn-custom w-100">
+                        <i class="fas fa-key me-2"></i>Change Password
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
